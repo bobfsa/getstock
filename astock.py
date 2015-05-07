@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*- 
+# encoding:utf8
 
 def parseRes(res):
 	return res.split('\n')
@@ -30,7 +30,7 @@ def outPutDatalist(datas):
 		toopen=float(data['openprice'])
 		up=pri-yc
 		upratio=up/yc
-		print "%s \tCurrent:%.2f\tYesterdayClose:%.2f\tTodayOpen:%.2f\tUpPrice:%.2f\t UpRatio:%1.2f%%" % (data['name'],pri,yc,toopen,up,(pri-yc)/yc*100)
+		print "%s \tCurrent:%.2f\tYesadyClose:%.2f\tTodayOpen:%.2f\tUpPrice:%.2f\tUpRatio:%1.2f%%" % (data['name'],pri,yc,toopen,up,(pri-yc)/yc*100)
 
 import sys
 if len(sys.argv)<=1:
