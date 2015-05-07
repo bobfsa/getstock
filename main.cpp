@@ -106,10 +106,30 @@ struct evbuffer *download_url(const char *url)
 int main(int argc, char **argv)  
 {  
     struct evbuffer * data = 0;  
-   // if(argc < 2){  
-  //      printf("usage: %s example.com/\n", argv[0]);  
-  //      return 1;  
- //   }  
+	list<char *> stocklist;
+	vector<string> urlist;
+   if(argc < 2){  
+        printf("usage: %s 600100 000001\n", argv[0]);  
+        return 1;  
+   }  
+   for(int index=0;index<argc-1;index++)
+   {
+		stocklist.push_back(argv[index+1]);
+		string temp,code(argv[index+1]);
+	   if(argv[index+1][0] == '6')
+		   temp="sh"+code;
+	   else if(strcmp(argv[index+1], "000001") == 0)
+		   temp="sh"+code;
+	   else
+		   temp="sz"+code;
+
+	   string tmpurl("http://hq.sinajs.cn/list=");
+		tmpurl+=temp;
+
+	   urlist.push_back(tmpurl);
+		//urlist.insert(
+   }
+
 	unsigned int index=0;
 
    	stock_report myrep;
@@ -127,38 +147,48 @@ int main(int argc, char **argv)
   
 	while(1)  
 	{  
-		if(index %2 == 0)
-			data = download_url("http://hq.sinajs.cn/list=sh600100");  
-		else
-			data = download_url("http://hq.sinajs.cn/list=sz000061");  
-		index++;
+		vector<string>::iterator itr;
+		//if(index %2 == 0)
+		//	data = download_url("http://hq.sinajs.cn/list=sh000001");  
+		//else
+		//	data = download_url("http://hq.sinajs.cn/list=sz000061");  
+		//index++;
+		for (itr = urlist.begin(); itr != urlist.end(); ++itr)
+		{
+			data = download_url(itr->c_str());
 
-		//printf("got %d bytes\n", data ? evbuffer_get_length(data) : -1);  
+			//printf("got %d bytes\n", data ? evbuffer_get_length(data) : -1);  
 
-		char * joined =(char *) evbuffer_pullup(data, -1);  
-		//printf("data itself:\n====================\n");  
-		// fwrite(joined, evbuffer_get_length(data), 1, stderr);  
-		//printf("%s",joined);
-		string stock(joined);
+			char * joined =(char *) evbuffer_pullup(data, -1);  
+			//printf("data itself:\n====================\n");  
+			// fwrite(joined, evbuffer_get_length(data), 1, stderr);  
+			//printf("%s",joined);
+			string stock(joined);
 
-		//boost::split(tokens, str, boost::is_any_of("&|"));
-		string result(stock, stock.find("\"")+1, stock.rfind("\"")-stock.find("\"")-2);
+			//boost::split(tokens, str, boost::is_any_of("&|"));
+			string result(stock, stock.find("\"")+1, stock.rfind("\"")-stock.find("\"")-2);
 
-		parser(result, myrep);
-		float price=myrep._data.current;
-		float last=myrep._data.yesterday_close;
-		float ratio=(price-last)*100/last;
-		printf("%s\n 当前:%.2f 涨跌额:%.2f \t 涨跌幅:%.2f%% \t开盘:%.2f \t昨收:%.2f \t最高:%.2f \t最低:%.2f\n",\
-			myrep.name, myrep._data.current, last-price, ratio, myrep._data.today_open, myrep._data.yesterday_close,\
-			 myrep._data.top,  myrep._data.bottom);
-		printf(" \t买一:%.2f \t卖一:%.2f \t交易量:%.0f  \t交易额度:%.0f\n",\
-			myrep._data.buy_one, myrep._data.sell_one,\
-			  myrep._data.turnover_hands,  myrep._data.turnover_money);
+			parser(result, myrep);
+			float price=myrep._data.current;
+			float last=myrep._data.yesterday_close;
+			float ratio=(price-last)*100/last;
+			printf("%s\n\t当前:%.2f \t涨跌额:%.2f \t涨跌幅:%.2f%%\n",\
+				myrep.name, myrep._data.current, last-price, ratio);
+			printf("\t开盘:%.2f \t昨收:%.2f \t最高:%.2f \t最低:%.2f\n",\
+				myrep._data.today_open, myrep._data.yesterday_close,myrep._data.top,  myrep._data.bottom);
+			//printf(" \t买一:%.2f \t卖一:%.2f \t交易量:%.2f(万手)\t交易额:%.2f(百万)\n",\
+			//	myrep._data.buy_one, myrep._data.sell_one,\
+			//	  myrep._data.turnover_hands/10000,  myrep._data.turnover_money/1000000);
+			printf(" \t买一:%.2f \t卖一:%.2f \t交易额:%.2f(百万)\n",\
+				myrep._data.buy_one, myrep._data.sell_one,\
+				  myrep._data.turnover_money/1000000);
+			//printf("\n %s\n",result.c_str());  
+			evbuffer_free(data);  
+			printf("********************************************************************\n");
+			printf("********************************************************************\n");
+		}
 
-		//printf("\n %s\n",result.c_str());  
-		evbuffer_free(data);  
-
-		Sleep(4000);
+		Sleep(20000);
 	}  
   
     return 0;  
