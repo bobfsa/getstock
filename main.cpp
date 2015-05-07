@@ -143,7 +143,7 @@ int main(int argc, char **argv)
     (void) WSAStartup(wVersionRequested, &wsaData);  
 #endif  
   
-
+	evthread_use_windows_threads();
   
 	while(1)  
 	{  
@@ -172,10 +172,12 @@ int main(int argc, char **argv)
 			float price=myrep._data.current;
 			float last=myrep._data.yesterday_close;
 			float ratio=(price-last)*100/last;
+			float top_ratio=(myrep._data.top-last)*100/last;
+			float bottom_raio=(myrep._data.bottom-last)*100/last;
 			printf("%s\n\t当前:%.2f \t涨跌额:%.2f \t涨跌幅:%.2f%%\n",\
-				myrep.name, myrep._data.current, last-price, ratio);
-			printf("\t开盘:%.2f \t昨收:%.2f \t最高:%.2f \t最低:%.2f\n",\
-				myrep._data.today_open, myrep._data.yesterday_close,myrep._data.top,  myrep._data.bottom);
+				myrep.name, myrep._data.current, price-last, ratio);
+			printf("\t开盘:%.2f \t昨收:%.2f \t最高:%.2f(%.2f%%) \t最低:%.2f(%.2f%%)\n",\
+				myrep._data.today_open, myrep._data.yesterday_close,myrep._data.top, top_ratio, myrep._data.bottom,bottom_raio);
 			//printf(" \t买一:%.2f \t卖一:%.2f \t交易量:%.2f(万手)\t交易额:%.2f(百万)\n",\
 			//	myrep._data.buy_one, myrep._data.sell_one,\
 			//	  myrep._data.turnover_hands/10000,  myrep._data.turnover_money/1000000);
